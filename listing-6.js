@@ -1,45 +1,5 @@
 'use strict';
 
-var numRecords = 0;
-var numPages = 0;
-
-// 
-// Read a single page of data from the database.
-//
-var readPage = (collection, pageIndex, pageSize) => {
-    var skipAmount = pageIndex * pageSize;
-    var limitAmount = pageSize;
-    return collection.find()
-        .skip(skipAmount)
-        .limit(pageSize)
-        .toArray();
-};
-
-// 
-// Read the entire database, page by page.
-//
-var readDatabase = (collection, startPageIndex, pageSize) => {
-    return readPage(collection, startPageIndex, pageSize)
-        .then(data => {
-            if (data.length > 0) {
-                // We got some data back.
-                console.log('chunk: ' + data.length);
-                
-				// TODO: Add your data processsing here.			
-
-                numRecords += data.length;
-                ++numPages;
-
-                // Read the entire database using an asynchronous recursive traversal.
-                return readDatabase(collection, startPageIndex+1, pageSize);
-            }
-            else {
-                // We retreived no data, finished reading.
-            }
-        })
-    
-};
-
 //
 // Open the connection to the database.
 //
@@ -60,14 +20,25 @@ function openDatabase () {
 
 openDatabase()
     .then(db => {
-		var pageSize = 100;
-        return readDatabase(db.collection, 0, pageSize)
-            .then(() => {
-                return db.close(); // Close database when done.
-            });
+        var query = {}; // Retreive all records.
+        var projection = { // This defines the fields to retreive from each record.
+            fields: {
+                _id: 0,
+                Year: 1,
+                Month: 1,
+                Day: 1,
+                Precipitation: 1
+            }
+        };
+        return db.collection.find(query, projection) // Retreive only specified fields.
+            .toArray()
+            .then(data => {
+                console.log(data);
+            })
+            .then(() => db.close()); // Close database when done.
     })
     .then(() => {
-        console.log("Displayed " + numRecords + " records in " + numPages + " pages.");
+        console.log("Done.");
     })
     .catch(err => {
         console.error("An error occurred reading the database.");

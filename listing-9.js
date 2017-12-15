@@ -1,5 +1,70 @@
 'use strict';
 
+const argv = require('yargs').argv;
+var MongoClient = require('mongodb').MongoClient;
+var spawn = require('child_process').spawn;
+var parallel = require('async-await-parallel');
+
+//
+// Run the slave process.
+//
+function runSlave (skip, limit) {
+    return new Promise((resolve, reject) => {
+        var args = [
+            'parallel-slave-example.js', 
+            '--skip', 
+            skip,
+            '--limit',
+            limit
+        ];
+        console.log("$$ node " + args.join(' '));
+        const childProcess = spawn('node', args);
+        childProcess.stdout.on('data', data => {
+            console.log(`stdout: ${data}`);
+        });
+
+        childProcess.stderr.on('data', data => {
+            console.log(`stderr: ${data}`);
+        });
+
+        childProcess.on('close', code => {
+            resolve();
+        });
+
+        childProcess.on('close', code => {
+            reject();
+        });
+    });
+};
+
+//
+// Run the slave process for a particular batch of records.
+//
+function processBatch (batchIndex, batchSize) {
+    var startIndex = batchIndex * batchSize;
+    return () => { // Encapsulate in an anon fn so that execution is deferred until later.
+        return runSlave(startIndex, batchSize);
+    };
+};
+
+//
+// Process the entire database in batches of 100 records.
+// 2 batches are processed in parallel, but this number can be tweaked based on the number of cores you
+// want to throw at the problem.
+//
+function processDatabaseInBatches (numRecords) {
+
+    var batchSize = 100; // The number of records to process in each batchs.
+    var maxProcesses = 2; // The number of process to run in parallel.
+    var numBatches = numRecords / batchSize; // Total nujmber of batches that we need to process.
+    var slaveProcesses = [];
+    for (var batchIndex = 0; batchIndex < numBatches; ++batchIndex) {
+        slaveProcesses.push(processBatch(batchIndex, batchSize));
+    }
+
+    return parallel(slaveProcesses, maxProcesses);
+};
+
 //
 // Open the connection to the database.
 //
@@ -20,27 +85,15 @@ function openDatabase () {
 
 openDatabase()
     .then(db => {
-        var query = {}; // Retreive all records.
-        var projection = { // This defines the fields to retreive from each record.
-            fields: {
-                _id: 0,
-                Year: 1,
-                Month: 1,
-                Day: 1,
-                Precipitation: 1
-            }
-        };
-        return db.collection.find(query, projection) // Retreive only specified fields.
-            .toArray()
-            .then(data => {
-                console.log(data);
-            })
-            .then(() => db.close()); // Close database when done.
+        return db.collection.find().count() // Determine number of records to process.
+            .then(numRecords => processDatabaseInBatches(numRecords)) // Process the entire database.
+            .then(() => db.close()); // Close the database when done.
     })
     .then(() => {
-        console.log("Done.");
+        console.log("Done processing all records.");
     })
     .catch(err => {
         console.error("An error occurred reading the database.");
         console.error(err);
     });
+
