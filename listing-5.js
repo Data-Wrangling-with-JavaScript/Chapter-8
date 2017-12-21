@@ -27,10 +27,10 @@ openDatabase()
     .then(db => {
         var query = { // Define our database query
             Year: {
-                $gte: 2005, // Year >= 2005
+                $gte: 2016, // Year >= 2016
             },
         };
-        return db.collection.find(query) // Retreive records since the year 2005.
+        return db.collection.find(query) // Retreive records since the year 2016.
             .toArray()
             .then(data => {
                 console.log(data);

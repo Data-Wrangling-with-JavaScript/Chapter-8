@@ -27,7 +27,7 @@ openDatabase()
     .then(db => {
         return db.collection.find() // Retreive only specified fields.
             .sort({
-                Precipitation: 1
+                Year: 1
             })
             .toArray()
             .then(data => {
