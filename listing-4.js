@@ -1,36 +1,19 @@
 'use strict';
 
-var numRecords = 0;
+const MongoClient = require('mongodb').MongoClient;
 
-//
-// Read the entire database, document by document using a database cursor.
-//
-var readDatabase = cursor => {
-    return cursor.next()
-        .then(record => {
-            if (record) {
-                // Found another record.
-                console.log(record);
-                ++numRecords;
-
-                // Read the entire database using an asynchronous recursive traversal.
-                return readDatabase(cursor);
-            }
-            else {
-                // No more records.
-            }
-        });
-};
+const hostName = 'mongodb://127.0.0.1:3000';
+const databaseName = 'weather_stations';
+const collectionName = 'daily_readings';
 
 //
 // Open the connection to the database.
 //
 function openDatabase () {
-    var MongoClient = require('mongodb').MongoClient;
-    return MongoClient.connect('mongodb://localhost')
+    return MongoClient.connect(hostName)
         .then(client => {
-            var db = client.db('weather_stations');
-            var collection = db.collection('daily_readings');
+            var db = client.db(databaseName);
+            var collection = db.collection(collectionName);
             return {
                 collection: collection,
                 close: () => {
@@ -40,13 +23,56 @@ function openDatabase () {
         });
 };
 
+var numRecords = 0;
+var numWindows = 0;
+
+// 
+// Read a single data window from the database.
+//
+function readWindow (collection, windowIndex, windowSize) {
+    var skipAmount = windowIndex * windowSize;
+    var limitAmount = windowSize;
+    return collection.find()
+        .skip(skipAmount)
+        .limit(windowSize)
+        .toArray();
+};
+
+// 
+// Read the entire database, window by window.
+//
+function readDatabase (collection, startWindowIndex, windowSize) {
+    return readWindow(collection, startWindowIndex, windowSize)
+        .then(data => {
+            if (data.length > 0) {
+                // We got some data back.
+                console.log("Window with " + data.length + " elements.");
+                
+				// TODO: Add your data processsing here.			
+
+                numRecords += data.length;
+                ++numWindows;
+
+                // Read the entire database using an asynchronous recursive traversal.
+                return readDatabase(collection, startWindowIndex+1, windowSize);
+            }
+            else {
+                // We retreived no data, finished reading.
+            }
+        })
+    
+};
+
 openDatabase()
     .then(db => {
-        return readDatabase(db.collection.find()) // NOTE: You could use a query here.
-            .then(() => db.close()); // Close database when done.
+		var windowSize = 100;
+        return readDatabase(db.collection, 0, windowSize)
+            .then(() => {
+                return db.close(); // Close database when done.
+            });
     })
     .then(() => {
-        console.log("Displayed " + numRecords + " records.");
+        console.log("Processed " + numRecords + " records in " + numWindows + " windows.");
     })
     .catch(err => {
         console.error("An error occurred reading the database.");

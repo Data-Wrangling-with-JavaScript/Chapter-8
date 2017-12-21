@@ -1,38 +1,58 @@
 'use strict';
 
 const argv = require('yargs').argv;
-var MongoClient = require('mongodb').MongoClient;
-var spawn = require('child_process').spawn;
-var parallel = require('async-await-parallel');
+const MongoClient = require('mongodb').MongoClient;
+const spawn = require('child_process').spawn;
+const parallel = require('async-await-parallel');
+
+const hostName = 'mongodb://127.0.0.1:3000';
+const databaseName = 'weather_stations';
+const collectionName = 'daily_readings';
+
+//
+// Open the connection to the database.
+//
+function openDatabase () {
+    return MongoClient.connect(hostName)
+        .then(client => {
+            var db = client.db(databaseName);
+            var collection = db.collection(collectionName);
+            return {
+                collection: collection,
+                close: () => {
+                    return client.close();
+                },
+            };
+        });
+};
 
 //
 // Run the slave process.
 //
-function runSlave (skip, limit) {
+function runSlave (skip, limit, slaveIndex) {
     return new Promise((resolve, reject) => {
-        var args = [
-            'parallel-slave-example.js', 
-            '--skip', 
-            skip,
-            '--limit',
-            limit
-        ];
-        console.log("$$ node " + args.join(' '));
+        var args = [ 'listing-8.js', '--skip', skip, '--limit', limit ];
+
         const childProcess = spawn('node', args);
         childProcess.stdout.on('data', data => {
-            console.log(`stdout: ${data}`);
+            console.log("[" + slaveIndex + "]: INF: " + data);
         });
 
         childProcess.stderr.on('data', data => {
-            console.log(`stderr: ${data}`);
+            console.log("[" + slaveIndex + "]: ERR: " + data);
         });
 
         childProcess.on('close', code => {
-            resolve();
+            if (code === 0) {
+                resolve();
+            }
+            else {
+                reject(code);
+            }
         });
 
-        childProcess.on('close', code => {
-            reject();
+        childProcess.on('error', err => {
+            reject(err);
         });
     });
 };
@@ -43,7 +63,7 @@ function runSlave (skip, limit) {
 function processBatch (batchIndex, batchSize) {
     var startIndex = batchIndex * batchSize;
     return () => { // Encapsulate in an anon fn so that execution is deferred until later.
-        return runSlave(startIndex, batchSize);
+        return runSlave(startIndex, batchSize, batchIndex);
     };
 };
 
@@ -52,11 +72,11 @@ function processBatch (batchIndex, batchSize) {
 // 2 batches are processed in parallel, but this number can be tweaked based on the number of cores you
 // want to throw at the problem.
 //
-function processDatabaseInBatches (numRecords) {
+function processDatabase (numRecords) {
 
     var batchSize = 100; // The number of records to process in each batchs.
     var maxProcesses = 2; // The number of process to run in parallel.
-    var numBatches = numRecords / batchSize; // Total nujmber of batches that we need to process.
+    var numBatches = numRecords / batchSize; // Total number of batches that we need to process.
     var slaveProcesses = [];
     for (var batchIndex = 0; batchIndex < numBatches; ++batchIndex) {
         slaveProcesses.push(processBatch(batchIndex, batchSize));
@@ -65,28 +85,10 @@ function processDatabaseInBatches (numRecords) {
     return parallel(slaveProcesses, maxProcesses);
 };
 
-//
-// Open the connection to the database.
-//
-function openDatabase () {
-    var MongoClient = require('mongodb').MongoClient;
-    return MongoClient.connect('mongodb://localhost')
-        .then(client => {
-            var db = client.db('weather_stations');
-            var collection = db.collection('daily_readings');
-            return {
-                collection: collection,
-                close: () => {
-                    return client.close();
-                },
-            };
-        });
-};
-
 openDatabase()
     .then(db => {
         return db.collection.find().count() // Determine number of records to process.
-            .then(numRecords => processDatabaseInBatches(numRecords)) // Process the entire database.
+            .then(numRecords => processDatabase(numRecords)) // Process the entire database.
             .then(() => db.close()); // Close the database when done.
     })
     .then(() => {

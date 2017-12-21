@@ -1,7 +1,28 @@
 'use strict';
 
 const argv = require('yargs').argv;
-var MongoClient = require('mongodb').MongoClient;
+const MongoClient = require('mongodb').MongoClient;
+
+const hostName = 'mongodb://127.0.0.1:3000';
+const databaseName = 'weather_stations';
+const collectionName = 'daily_readings';
+
+//
+// Open the connection to the database.
+//
+function openDatabase () {
+    return MongoClient.connect(hostName)
+        .then(client => {
+            var db = client.db(databaseName);
+            var collection = db.collection(collectionName);
+            return {
+                collection: collection,
+                close: () => {
+                    return client.close();
+                },
+            };
+        });
+};
 
 function processData (collection, skipAmount, limitAmount) {
     return collection.find()
@@ -10,24 +31,6 @@ function processData (collection, skipAmount, limitAmount) {
         .toArray()
         .then(data => {
             console.log(">> Your code to process " + data.length + " records here!"); 
-        });
-};
-
-//
-// Open the connection to the database.
-//
-function openDatabase () {
-    var MongoClient = require('mongodb').MongoClient;
-    return MongoClient.connect('mongodb://localhost')
-        .then(client => {
-            var db = client.db('weather_stations');
-            var collection = db.collection('daily_readings');
-            return {
-                collection: collection,
-                close: () => {
-                    return client.close();
-                },
-            };
         });
 };
 

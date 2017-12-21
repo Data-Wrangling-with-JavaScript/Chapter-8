@@ -1,54 +1,19 @@
 'use strict';
 
-var numRecords = 0;
-var numPages = 0;
+const MongoClient = require('mongodb').MongoClient;
 
-// 
-// Read a single page of data from the database.
-//
-var readPage = (collection, pageIndex, pageSize) => {
-    var skipAmount = pageIndex * pageSize;
-    var limitAmount = pageSize;
-    return collection.find()
-        .skip(skipAmount)
-        .limit(pageSize)
-        .toArray();
-};
-
-// 
-// Read the entire database, page by page.
-//
-var readDatabase = (collection, startPageIndex, pageSize) => {
-    return readPage(collection, startPageIndex, pageSize)
-        .then(data => {
-            if (data.length > 0) {
-                // We got some data back.
-                console.log('chunk: ' + data.length);
-                
-				// TODO: Add your data processsing here.			
-
-                numRecords += data.length;
-                ++numPages;
-
-                // Read the entire database using an asynchronous recursive traversal.
-                return readDatabase(collection, startPageIndex+1, pageSize);
-            }
-            else {
-                // We retreived no data, finished reading.
-            }
-        })
-    
-};
+const hostName = 'mongodb://127.0.0.1:3000';
+const databaseName = 'weather_stations';
+const collectionName = 'daily_readings';
 
 //
 // Open the connection to the database.
 //
 function openDatabase () {
-    var MongoClient = require('mongodb').MongoClient;
-    return MongoClient.connect('mongodb://localhost')
+    return MongoClient.connect(hostName)
         .then(client => {
-            var db = client.db('weather_stations');
-            var collection = db.collection('daily_readings');
+            var db = client.db(databaseName);
+            var collection = db.collection(collectionName);
             return {
                 collection: collection,
                 close: () => {
@@ -58,16 +23,37 @@ function openDatabase () {
         });
 };
 
+var numRecords = 0;
+
+//
+// Read the entire database, document by document using a database cursor.
+//
+function readDatabase (cursor) {
+    return cursor.next()
+        .then(record => {
+            if (record) {
+                // Found another record.
+                // Put your code here for processing the record.
+                console.log(record);
+                ++numRecords;
+
+                // Read the entire database using an asynchronous recursive traversal.
+                return readDatabase(cursor);
+            }
+            else {
+                // No more records.
+            }
+        });
+};
+
 openDatabase()
     .then(db => {
-		var pageSize = 100;
-        return readDatabase(db.collection, 0, pageSize)
-            .then(() => {
-                return db.close(); // Close database when done.
-            });
+        var databaseCursor = db.collection.find();
+        return readDatabase(databaseCursor) // NOTE: You could use a query here.
+            .then(() => db.close()); // Close database when done.
     })
     .then(() => {
-        console.log("Displayed " + numRecords + " records in " + numPages + " pages.");
+        console.log("Displayed " + numRecords + " records.");
     })
     .catch(err => {
         console.error("An error occurred reading the database.");

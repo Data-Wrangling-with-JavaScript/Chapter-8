@@ -1,0 +1,26 @@
+{
+  "name": "Chapter-8",
+  "version": "1.0.0",
+  "description": "Code examples for Chapter 8 of JavaScript Data Wrangling.",
+  "main": "listing-2.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://ashleydavis@github.com/JavaScript-Data-Wrangling/Chapter-8.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/JavaScript-Data-Wrangling/Chapter-8/issues"
+  },
+  "homepage": "https://github.com/JavaScript-Data-Wrangling/Chapter-8#readme",
+  "dependencies": {
+    "async-await-parallel": "1.0.0",
+    "mongodb": "3.0.0-rc0",
+    "papaparse": "4.3.6",
+    "yargs": "10.0.3"
+  }
+}
