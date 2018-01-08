@@ -57,3 +57,5 @@ typings/
 # dotenv environment variables file
 .env
 
+vm-with-empty-db/.vagrant/
+vm-with-sample-db/.vagrant/
