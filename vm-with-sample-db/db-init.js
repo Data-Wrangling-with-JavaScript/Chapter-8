@@ -49,6 +49,8 @@ var db = mongo('localhost:27017/weather_stations', ['daily_readings']);
 
 importCsvFile('/code/data/weather-stations.csv')
     .then(data => exportToMongoDB(db, 'daily_readings', data))
+    .then(() => db.daily_readings.createIndex({ Year: 1 }))
+    .then(() => db.daily_readings.createIndex({ Year: -1 }))
     .then(() => db.close())
     .catch(err => {
         console.error("An error occurred.");
