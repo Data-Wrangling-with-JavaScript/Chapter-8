@@ -2,7 +2,7 @@
 
 const MongoClient = require('mongodb').MongoClient;
 
-const hostName = 'mongodb://127.0.0.1:3000';
+const hostName = 'mongodb://127.0.0.1:7000';
 const databaseName = 'weather_stations';
 const collectionName = 'daily_readings';
 

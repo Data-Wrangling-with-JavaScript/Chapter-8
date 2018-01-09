@@ -4,7 +4,7 @@ const openCsvInputStream = require('./toolkit/open-csv-input-stream');
 const openMongodbOutputStream = require('./toolkit/open-mongodb-output-stream');
 const MongoClient = require('mongodb').MongoClient;
 
-const hostName = 'mongodb://127.0.0.1:2000';
+const hostName = 'mongodb://127.0.0.1:6000';
 const databaseName = 'weather_stations';
 const collectionName = 'daily_readings';
 
