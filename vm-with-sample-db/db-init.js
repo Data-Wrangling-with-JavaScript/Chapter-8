@@ -1,12 +1,12 @@
 'use strict';
 
-var papa = require('papaparse');
-var fs = require('fs');
+const papa = require('papaparse');
+const fs = require('fs');
 
 //
 // Read a text file form the file system.
 //
-var read = function (fileName) {
+function read (fileName) {
     return new Promise((resolve, reject) => {
         fs.readFile(fileName, 'utf8',
             function (err, textFileData) {
@@ -24,10 +24,10 @@ var read = function (fileName) {
 //
 // Helper function to import a CSV file.
 //
-var importCsvFile = function (filePath) {
+const importCsvFile (filePath) {
 	return read(filePath)
 		.then(textFileData => {
-			var result = papa.parse(textFileData, {
+			const result = papa.parse(textFileData, {
 				header: true,
 				dynamicTyping: true,
 			});
@@ -35,7 +35,7 @@ var importCsvFile = function (filePath) {
 		});
 };
 
-var exportToMongoDB = function (db, collectionName, data) {
+const exportToMongoDB (db, collectionName, data) {
     return data.reduce((prevPromise, row) => {
         return prevPromise.then(() => {
             return db[collectionName].insert(row);
@@ -43,9 +43,9 @@ var exportToMongoDB = function (db, collectionName, data) {
     }, Promise.resolve());
 };
 
-var mongo = require('promised-mongo');
+const mongo = require('promised-mongo');
 
-var db = mongo('localhost:27017/weather_stations', ['daily_readings']);
+const db = mongo('localhost:27017/weather_stations', ['daily_readings']);
 
 importCsvFile('/code/data/weather-stations.csv')
     .then(data => exportToMongoDB(db, 'daily_readings', data))

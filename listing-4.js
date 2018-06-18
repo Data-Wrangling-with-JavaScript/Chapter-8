@@ -12,8 +12,8 @@ const collectionName = 'daily_readings';
 function openDatabase () {
     return MongoClient.connect(hostName)
         .then(client => {
-            var db = client.db(databaseName);
-            var collection = db.collection(collectionName);
+            const db = client.db(databaseName);
+            const collection = db.collection(collectionName);
             return {
                 collection: collection,
                 close: () => {
@@ -23,15 +23,15 @@ function openDatabase () {
         });
 };
 
-var numRecords = 0;
-var numWindows = 0;
+let numRecords = 0;
+let numWindows = 0;
 
 // 
 // Read a single data window from the database.
 //
 function readWindow (collection, windowIndex, windowSize) {
-    var skipAmount = windowIndex * windowSize;
-    var limitAmount = windowSize;
+    const skipAmount = windowIndex * windowSize;
+    const limitAmount = windowSize;
     return collection.find()
         .skip(skipAmount)
         .limit(windowSize)
@@ -65,7 +65,7 @@ function readDatabase (collection, startWindowIndex, windowSize) {
 
 openDatabase()
     .then(db => {
-		var windowSize = 100;
+		const windowSize = 100;
         return readDatabase(db.collection, 0, windowSize)
             .then(() => {
                 return db.close(); // Close database when done.

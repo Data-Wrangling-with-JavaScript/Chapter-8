@@ -29,8 +29,6 @@ function openCsvInputStream (inputFilePath) {
         },
 
         error: (err) => { // An error has occurred.
-            console.error("error in stream!"); //fio:
-            console.error(err); //fio:
             csvInputStream.emit('error', err); // Pass on errors.
         }
     });    

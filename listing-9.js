@@ -15,8 +15,8 @@ const collectionName = 'daily_readings';
 function openDatabase () {
     return MongoClient.connect(hostName)
         .then(client => {
-            var db = client.db(databaseName);
-            var collection = db.collection(collectionName);
+            const db = client.db(databaseName);
+            const collection = db.collection(collectionName);
             return {
                 collection: collection,
                 close: () => {
@@ -31,7 +31,7 @@ function openDatabase () {
 //
 function runSlave (skip, limit, slaveIndex) {
     return new Promise((resolve, reject) => {
-        var args = [ 'listing-8.js', '--skip', skip, '--limit', limit ];
+        const args = [ 'listing-8.js', '--skip', skip, '--limit', limit ];
 
         const childProcess = spawn('node', args);
         childProcess.stdout.on('data', data => {
@@ -61,7 +61,7 @@ function runSlave (skip, limit, slaveIndex) {
 // Run the slave process for a particular batch of records.
 //
 function processBatch (batchIndex, batchSize) {
-    var startIndex = batchIndex * batchSize;
+    const startIndex = batchIndex * batchSize;
     return () => { // Encapsulate in an anon fn so that execution is deferred until later.
         return runSlave(startIndex, batchSize, batchIndex);
     };
@@ -74,11 +74,11 @@ function processBatch (batchIndex, batchSize) {
 //
 function processDatabase (numRecords) {
 
-    var batchSize = 100; // The number of records to process in each batchs.
-    var maxProcesses = 2; // The number of process to run in parallel.
-    var numBatches = numRecords / batchSize; // Total number of batches that we need to process.
-    var slaveProcesses = [];
-    for (var batchIndex = 0; batchIndex < numBatches; ++batchIndex) {
+    const batchSize = 100; // The number of records to process in each batchs.
+    const maxProcesses = 2; // The number of process to run in parallel.
+    const numBatches = numRecords / batchSize; // Total number of batches that we need to process.
+    const slaveProcesses = [];
+    for (let batchIndex = 0; batchIndex < numBatches; ++batchIndex) {
         slaveProcesses.push(processBatch(batchIndex, batchSize));
     }
 

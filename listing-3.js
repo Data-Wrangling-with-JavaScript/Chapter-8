@@ -12,8 +12,8 @@ const collectionName = 'daily_readings';
 function openDatabase () {
     return MongoClient.connect(hostName)
         .then(client => {
-            var db = client.db(databaseName);
-            var collection = db.collection(collectionName);
+            const db = client.db(databaseName);
+            const collection = db.collection(collectionName);
             return {
                 collection: collection,
                 close: () => {
@@ -23,7 +23,7 @@ function openDatabase () {
         });
 };
 
-var numRecords = 0;
+let numRecords = 0;
 
 //
 // Read the entire database, document by document using a database cursor.
@@ -48,7 +48,7 @@ function readDatabase (cursor) {
 
 openDatabase()
     .then(db => {
-        var databaseCursor = db.collection.find();
+        const databaseCursor = db.collection.find();
         return readDatabase(databaseCursor) // NOTE: You could use a query here.
             .then(() => db.close()); // Close database when done.
     })

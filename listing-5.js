@@ -12,8 +12,8 @@ const collectionName = 'daily_readings';
 function openDatabase () {
     return MongoClient.connect(hostName)
         .then(client => {
-            var db = client.db(databaseName);
-            var collection = db.collection(collectionName);
+          const db = client.db(databaseName);
+          const collection = db.collection(collectionName);
             return {
                 collection: collection,
                 close: () => {
@@ -25,7 +25,7 @@ function openDatabase () {
 
 openDatabase()
     .then(db => {
-        var query = { // Define our database query
+      const query = { // Define our database query
             Year: {
                 $gte: 2016, // Year >= 2016
             },

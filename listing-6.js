@@ -12,8 +12,8 @@ const collectionName = 'daily_readings';
 function openDatabase () {
     return MongoClient.connect(hostName)
         .then(client => {
-            var db = client.db(databaseName);
-            var collection = db.collection(collectionName);
+            const db = client.db(databaseName);
+            const collection = db.collection(collectionName);
             return {
                 collection: collection,
                 close: () => {
@@ -25,8 +25,8 @@ function openDatabase () {
 
 openDatabase()
     .then(db => {
-        var query = {}; // Retreive all records.
-        var projection = { // This defines the fields to retreive from each record.
+        const query = {}; // Retreive all records.
+        const projection = { // This defines the fields to retreive from each record.
             fields: {
                 _id: 0,
                 Year: 1,

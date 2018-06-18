@@ -16,8 +16,8 @@ const inputFilePath = "./data/weather-stations.csv";
 function openDatabase () {
     return MongoClient.connect(hostName)
         .then(client => {
-            var db = client.db(databaseName);
-            var collection = db.collection(collectionName);
+            const db = client.db(databaseName);
+            const collection = db.collection(collectionName);
             return {
                 collection: collection,
                 close: () => {
