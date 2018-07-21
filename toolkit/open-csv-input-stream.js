@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 
 const stream = require('stream');
 const fs = require('fs');
@@ -29,7 +29,7 @@ function openCsvInputStream (inputFilePath) {
         },
 
         error: (err) => { // An error has occurred.
-            csvInputStream.emit('error', err); // Pass on errors.
+            csvInputStream.emit("error", err); // Pass on errors.
         }
     });    
 

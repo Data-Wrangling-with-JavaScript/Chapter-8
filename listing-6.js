@@ -1,10 +1,10 @@
-'use strict';
+"use strict";
 
 const MongoClient = require('mongodb').MongoClient;
 
-const hostName = 'mongodb://127.0.0.1:7000';
-const databaseName = 'weather_stations';
-const collectionName = 'daily_readings';
+const hostName = "mongodb://127.0.0.1:7000";
+const databaseName = "weather_stations";
+const collectionName = "daily_readings";
 
 //
 // Open the connection to the database.
@@ -31,7 +31,6 @@ openDatabase()
                 _id: 0,
                 Year: 1,
                 Month: 1,
-                Day: 1,
                 Precipitation: 1
             }
         };

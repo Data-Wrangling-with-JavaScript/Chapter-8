@@ -1,12 +1,12 @@
-'use strict';
+"use strict";
 
 const openCsvInputStream = require('./toolkit/open-csv-input-stream');
 const openMongodbOutputStream = require('./toolkit/open-mongodb-output-stream');
 const MongoClient = require('mongodb').MongoClient;
 
-const hostName = 'mongodb://127.0.0.1:6000';
-const databaseName = 'weather_stations';
-const collectionName = 'daily_readings';
+const hostName = "mongodb://127.0.0.1:6000";
+const databaseName = "weather_stations";
+const collectionName = "daily_readings";
 
 const inputFilePath = "./data/weather-stations.csv";
 
@@ -31,10 +31,10 @@ function streamData (inputFilePath, dbCollection) {
     return new Promise((resolve, reject) => {
         openCsvInputStream(inputFilePath)
             .pipe(openMongodbOutputStream(dbCollection))
-            .on('finish', () => {
+            .on("finish", () => {
                 resolve();
             })
-            .on('error', err => {
+            .on("error", err => {
                 reject(err);
             });
     });
@@ -46,7 +46,7 @@ openDatabase()
             .then(() => client.close());
     })
     .then(() => {
-        console.log('Done');
+        console.log("Done");
     })
     .catch(err => {
         console.error("An error occurred.");

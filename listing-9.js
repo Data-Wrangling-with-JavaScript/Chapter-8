@@ -1,13 +1,13 @@
-'use strict';
+"use strict";
 
 const argv = require('yargs').argv;
 const MongoClient = require('mongodb').MongoClient;
 const spawn = require('child_process').spawn;
 const parallel = require('async-await-parallel');
 
-const hostName = 'mongodb://127.0.0.1:7000';
-const databaseName = 'weather_stations';
-const collectionName = 'daily_readings';
+const hostName = "mongodb://127.0.0.1:7000";
+const databaseName = "weather_stations";
+const collectionName = "daily_readings";
 
 //
 // Open the connection to the database.
@@ -31,18 +31,18 @@ function openDatabase () {
 //
 function runSlave (skip, limit, slaveIndex) {
     return new Promise((resolve, reject) => {
-        const args = [ 'listing-8.js', '--skip', skip, '--limit', limit ];
+        const args = [ "listing-8.js", "--skip", skip, "--limit", limit ];
 
-        const childProcess = spawn('node', args);
-        childProcess.stdout.on('data', data => {
+        const childProcess = spawn("node", args);
+        childProcess.stdout.on("data", data => {
             console.log("[" + slaveIndex + "]: INF: " + data);
         });
 
-        childProcess.stderr.on('data', data => {
+        childProcess.stderr.on("data", data => {
             console.log("[" + slaveIndex + "]: ERR: " + data);
         });
 
-        childProcess.on('close', code => {
+        childProcess.on("close", code => {
             if (code === 0) {
                 resolve();
             }
@@ -51,7 +51,7 @@ function runSlave (skip, limit, slaveIndex) {
             }
         });
 
-        childProcess.on('error', err => {
+        childProcess.on("error", err => {
             reject(err);
         });
     });

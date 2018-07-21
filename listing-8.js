@@ -1,11 +1,11 @@
-'use strict';
+"use strict";
 
 const argv = require('yargs').argv;
 const MongoClient = require('mongodb').MongoClient;
 
-const hostName = 'mongodb://127.0.0.1:7000';
-const databaseName = 'weather_stations';
-const collectionName = 'daily_readings';
+const hostName = "mongodb://127.0.0.1:7000";
+const databaseName = "weather_stations";
+const collectionName = "daily_readings";
 
 if (argv.skip === undefined || argv.limit === undefined) {
     throw new Error("Slave process requires command line arguments 'skip' and 'limit' to define the data window.");
