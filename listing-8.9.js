@@ -31,7 +31,7 @@ function openDatabase () {
 //
 function runSlave (skip, limit, slaveIndex) {
     return new Promise((resolve, reject) => {
-        const args = [ "listing-8.js", "--skip", skip, "--limit", limit ];
+        const args = [ "listing-8.8.js", "--skip", skip, "--limit", limit ];
 
         const childProcess = spawn("node", args);
         childProcess.stdout.on("data", data => {
