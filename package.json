@@ -20,7 +20,7 @@
   "dependencies": {
     "async-await-parallel": "1.0.0",
     "mongodb": "3.0.0-rc0",
-    "papaparse": "4.3.6",
+    "papaparse": "5.2.0",
     "yargs": "10.0.3"
   }
 }
